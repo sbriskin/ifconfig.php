@@ -2,7 +2,7 @@
 /*
  * User connection info
  *
- * Version: 1.0 2014/03/06
+ * Version: 1.1 2014/03/08
  * License: GPL v2 (https://www.gnu.org/licenses/gpl-2.0.html)
  *
  * Copyright (C) 2014  Sergey Briskin (http://briskin.org)
@@ -43,29 +43,22 @@ $user = array(
 	'dnt' 		=> $_SERVER['HTTP_DNT']
 	);
 
-// Single HTTP-HEADER value request (ex. ifconfig.php?q=ip)
-$rqst=trim(preg_replace('/ +/', ' ', preg_replace('/[^A-Za-z0-9 ]/', ' ', urldecode(html_entity_decode(strip_tags($_GET['q'])))))); 
+// Check request (ex. ifconfig.php?q=ip)
+$query=trim(preg_replace('/ +/', ' ', preg_replace('/[^A-Za-z0-9 ]/', ' ', urldecode(html_entity_decode(strip_tags($_GET['q'])))))); 
 
-// Output format (ex. ifconfig.php?f=xml)
-$type=trim(preg_replace('/ +/', ' ', preg_replace('/[^A-Za-z0-9 ]/', ' ', urldecode(html_entity_decode(strip_tags($_GET['f']))))));
-
-// Return Single value on request & die
-if (isset($rqst) && !empty($user[$rqst]) && array_key_exists($rqst, $user)) {
-	die($user[$rqst]);
+// Return single value on request & die
+if (isset($query) && !empty($user[$query]) && array_key_exists($query, $user)) {
+	die($user[$query]."\n");
 }
-unset($rqst);
-
-// Return full output in one of supported formats (xml, json, plain text. default: html)
-if (isset($type) && ($type=="text")) {
+// Return full output in one of supported formats (html, text, xml, json. default: html)
+elseif (isset($query) && ($query=="text")) {
 	header('Content-Type: text/plain');
 	foreach($user as $key => $value) {
 		echo $key.": ".$value."\n";
 	}
 	die();
-} elseif (isset($type) && ($type=="json")) {
-	header('Content-Type: application/json');
-	die(json_encode($user));
-} elseif (isset($type) && ($type=="xml")) {
+
+} elseif (isset($query) && ($query=="xml")) {
 	header('Content-Type: text/xml');
 
 // Function for SimpleXML creation
@@ -79,6 +72,10 @@ function array_to_xml(array $arr, SimpleXMLElement $xml)
     return $xml;
 }
 echo array_to_xml($user, new SimpleXMLElement('<info/>'))->asXML();
+
+} elseif (isset($query) && ($query=="json")) {
+	header('Content-Type: application/json');
+	die(json_encode($user));
 
 } else {
 	header('Content-Type: text/html');
@@ -95,7 +92,7 @@ echo array_to_xml($user, new SimpleXMLElement('<info/>'))->asXML();
 			font-size: .9em;
 		}
 		p {
-			font-family: "Source Code Pro", "Courier New", "Consolas", "Terminal", "Droid Mono", fixed;
+			font-family: "Source Code Pro", "Droid Mono", "Courier New", "Consolas", "Terminal", fixed;
 			line-height: 1em;
 		}
 		.small, .small > a {
