@@ -2,7 +2,6 @@
 /*
  * User connection info
  *
- * Version: 1.1 2014/03/08
  * License: GPL v2 (https://www.gnu.org/licenses/gpl-2.0.html)
  *
  * Copyright (C) 2014  Sergey Briskin (http://briskin.org)
@@ -47,11 +46,11 @@ $user = array(
 $query=trim(preg_replace('/ +/', ' ', preg_replace('/[^A-Za-z0-9 ]/', ' ', urldecode(html_entity_decode(strip_tags($_GET['q'])))))); 
 
 // Return single value on request & die
-if (isset($query) && !empty($user[$query]) && array_key_exists($query, $user)) {
-	die($user[$query]."\n");
+if (isset($query) && array_key_exists($query, $user)) {
+	empty($user[$query]) ? die() : die($user[$query]."\n");
 }
 // Return full output in one of supported formats (html, text, xml, json. default: html)
-elseif (isset($query) && ($query=="text")) {
+elseif (isset($query) && (($query=="text") || ($query=="all"))) {
 	header('Content-Type: text/plain');
 	foreach($user as $key => $value) {
 		echo $key.": ".$value."\n";
@@ -106,7 +105,7 @@ echo array_to_xml($user, new SimpleXMLElement('<info/>'))->asXML();
 <body>
 <?
 	foreach($user as $key => $value) {
-		echo '	<p id='.$key.'>'.$key.': '.$value.'</p>'."\n";
+		echo '	<p id="'.$key.'">'.$key.': '.$value.'</p>'."\n";
 	}
 ?>
 <br/>
